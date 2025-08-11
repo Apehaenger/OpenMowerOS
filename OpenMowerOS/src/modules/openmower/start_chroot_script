@@ -16,6 +16,13 @@ install_cleanup_trap
 export DEBIAN_FRONTEND=noninteractive
 APT_ARGS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
 
+# Prevent services from trying to start inside chroot & preseed initramfs-tools
+echo_green "Installing temporary policy-rc.d to block service start..."
+echo -e '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d
+chmod +x /usr/sbin/policy-rc.d
+mkdir -p /etc/initramfs-tools/conf.d
+echo 'update_initramfs=no' > /etc/initramfs-tools/conf.d/disable_update
+
 
 echo_green "Copying files to root filesystem and applying permissions..."
 unpack /filesystem/root /
@@ -55,3 +62,5 @@ systemctl enable openmower-branding.service
 #cleanup
 apt-get clean
 apt-get autoremove --yes
+rm -f /usr/sbin/policy-rc.d || true
+rm -f /etc/initramfs-tools/conf.d/disable_update || true
