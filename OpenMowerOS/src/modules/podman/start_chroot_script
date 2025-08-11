@@ -12,6 +12,9 @@ set -ex
 source /common.sh
 install_cleanup_trap
 
+export DEBIAN_FRONTEND=noninteractive
+APT_ARGS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
+
 # ToDo Ubuntu check
 # needs a case statement rework
 if [ "${BASE_DISTRO}" == "ubuntu" ] && [ "$(echo "$(grep VERSION_ID /etc/os-release |  -e 's/VERSION_ID="// ; s/"//') < 20.10" | bc)" ]; then
@@ -21,7 +24,7 @@ fi
 
 echo_green "Installing podman..."
 apt-get update --allow-releaseinfo-change
-apt-get install --yes podman
+apt-get install $APT_ARGS --yes podman
 
 ### ToDo - only available at debian sid -> next major raspian release / ubuntu jammy
 #
@@ -41,7 +44,7 @@ apt-get install --yes podman
 #
 if [ "${PODMAN_COMPOSE}" == "stable" ] || [ "${PODMAN_COMPOSE}" == "devel" ]; then
     echo_green "Installing podman-compose"
-    apt-get install --yes python3-pip
+    apt-get install $APT_ARGS --yes python3-pip
     pip3 install --upgrade pip
     if [ "${PODMAN_COMPOSE}" == "stable" ]; then
         pip3 install podman-compose

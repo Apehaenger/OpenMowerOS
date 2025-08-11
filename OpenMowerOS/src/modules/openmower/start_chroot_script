@@ -12,6 +12,10 @@ set -ex
 source /common.sh
 install_cleanup_trap
 
+# Non-interaktive APT/Dpkg Einstellungen (verhindert Conffile-Prompts im CI Build)
+export DEBIAN_FRONTEND=noninteractive
+APT_ARGS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
+
 
 echo_green "Copying files to root filesystem and applying permissions..."
 unpack /filesystem/root /
@@ -36,7 +40,7 @@ systemctl_if_exists mask raspberrypi-net-mods.service
 
 echo_green "Get socat for GPS redirection (debug port)..."
 apt-get update --allow-releaseinfo-change
-apt-get install --yes socat
+apt-get install $APT_ARGS --yes socat
 
 echo_green "Disabling podman auto update..."
 systemctl disable podman-auto-update.timer 

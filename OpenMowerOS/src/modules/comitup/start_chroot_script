@@ -12,6 +12,9 @@ set -ex
 source /common.sh
 install_cleanup_trap
 
+export DEBIAN_FRONTEND=noninteractive
+APT_ARGS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
+
 # ToDo Ubuntu check https://github.com/davesteele/comitup/issues/209#issuecomment-1209916831
 #
 # disabling systemd-resolveds caching DNS stub resolver on ubuntu
@@ -27,7 +30,7 @@ wget https://davesteele.github.io/comitup/latest/davesteele-comitup-apt-source_l
 dpkg -i --force-all davesteele-comitup-apt-source_latest.deb
 rm davesteele-comitup-apt-source_latest.deb
 apt-get update --allow-releaseinfo-change
-apt-get install --yes comitup --no-install-recommends
+apt-get install $APT_ARGS --yes comitup --no-install-recommends
 
 # enable required services and mask conflicting services
 systemctl enable NetworkManager.service
