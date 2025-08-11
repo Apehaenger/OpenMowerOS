@@ -3,7 +3,6 @@
 export DEBIAN_FRONTEND=noninteractive
 export APT_LISTCHANGES_FRONTEND=none
 export NEEDRESTART_MODE=a
-DPKG_OPTIONS=("-o" "Dpkg::Options::=--force-confdef" "-o" "Dpkg::Options::=--force-confold")
 
 if compgen -G "./OpenMowerOS/src/image/*" > /dev/null; then
     echo "Image exists, skipping download."
@@ -25,5 +24,5 @@ OPENMOWER_GIT_SHORT="$GIT_COMMIT_SHORT"
 EOF
 
 echo "Starting Image Build (commit $GIT_COMMIT_SHORT at $BUILD_DATE_UTC)"
-sudo env DEBIAN_FRONTEND=noninteractive "${DPKG_OPTIONS[@]}" bash -c "./OpenMowerOS/src/build_dist"
+sudo DEBIAN_FRONTEND=noninteractive APT_LISTCHANGES_FRONTEND=none NEEDRESTART_MODE=a bash -c "./OpenMowerOS/src/build_dist"
 
