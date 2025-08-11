@@ -17,7 +17,7 @@ if [[ "$OM_MODE" == "debug" ]]; then
     --volume /boot/openmower/mower_config.txt:/config/mower_config.sh \
     --volume /root/ros_home:/root \
     --label io.containers.autoupdate="image" \
-    ghcr.io/clemenselflein/open_mower_ros:releases-${OM_VERSION}
+    ghcr.io/clemenselflein/open_mower_ros:${OM_VERSION}
 else
   # Normal mode
   exec /usr/bin/podman run --conmon-pidfile "$1" --cidfile "$2" --cgroups=no-conmon \
@@ -31,5 +31,5 @@ else
     --env ROSCONSOLE_CONFIG_FILE=/config/rosconsole.config \
     --env ROSOUT_DISABLE_FILE_LOGGING="True" \
     --label io.containers.autoupdate="registry" \
-    ghcr.io/clemenselflein/open_mower_ros:releases-${OM_VERSION}
+    ghcr.io/clemenselflein/open_mower_ros:${OM_VERSION}
 fi
