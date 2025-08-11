@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# CustomPiOS module : etherbridge
+# Builds and installs the EtherBridge tool from https://github.com/xtech/etherbridge
+# MIT licensed upstream.
+# This module clones a specific ref, builds via CMake, and deploys the binary for user 'pi'.
+
+set -ex
+
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing build dependencies for etherbridge..."
+apt-get update --allow-releaseinfo-change
+DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
+  git cmake build-essential
+
+# Allow overriding ref via environment variable before build (optional)
+ETHERBRIDGE_REPO_URL="${ETHERBRIDGE_REPO_URL:-https://github.com/xtech/etherbridge.git}"
+ETHERBRIDGE_REF="${ETHERBRIDGE_REF:-master}"
+
+WORKDIR="/tmp/etherbridge-src"
+rm -rf "$WORKDIR"
+git clone --depth 1 --branch "$ETHERBRIDGE_REF" "$ETHERBRIDGE_REPO_URL" "$WORKDIR"
+
+pushd "$WORKDIR"
+mkdir -p build
+cd build
+cmake ..
+make -j"$(nproc)"
+
+echo_green "Deploying etherbridge binary..."
+install -d /home/pi/etherbridge
+cp -f etherbridge /home/pi/etherbridge/
+chown -R pi:pi /home/pi/etherbridge
+chmod 0755 /home/pi/etherbridge/etherbridge
+
+# Convenience symlink into PATH
+ln -sf /home/pi/etherbridge/etherbridge /usr/local/bin/etherbridge
+
+popd
+
+echo_green "Cleaning up build dependencies cache..."
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
+echo_green "etherbridge module completed. Binary available at /home/pi/etherbridge/etherbridge (symlink: /usr/local/bin/etherbridge)"
