@@ -9,6 +9,12 @@ if [[ "$1" == "debug" || "$1" == "normal" ]]; then
     echo "Set OM_MODE=$1 in $ENV_FILE"
     sudo systemctl daemon-reload
     sudo systemctl restart "$SERVICE"
+    # Refresh branding (issue & motd)
+    if command -v sudo >/dev/null; then
+        sudo /usr/local/bin/openmower-refresh-branding || true
+    else
+        /usr/local/bin/openmower-refresh-branding || true
+    fi
     echo "Service $SERVICE restarted."
 else
     echo "Usage: $0 [normal|debug]"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh OpenMower branding (issue/motd) at boot
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/openmower-refresh-branding
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

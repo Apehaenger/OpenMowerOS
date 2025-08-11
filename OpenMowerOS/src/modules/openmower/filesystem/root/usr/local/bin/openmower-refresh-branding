@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+
+VERSION_FILE=/boot/openmower/openmower_version.txt
+MODE_FILE=/home/pi/openmower_mode.env
+BUILDINFO_FILE=/etc/openmower-buildinfo
+ISSUE_TMP=/run/openmower.issue
+MOTD_FILE=/etc/motd.d/10-openmower
+
+[ -f "$VERSION_FILE" ] && source "$VERSION_FILE"
+[ -f "$MODE_FILE" ] && source "$MODE_FILE" || OM_MODE="unknown"
+[ -f "$BUILDINFO_FILE" ] && source "$BUILDINFO_FILE"
+
+OM_VARIANT="$OM_VERSION"
+
+CONTAINER_IMAGE=""
+CONTAINER_DIGEST=""
+if command -v podman >/dev/null 2>&1 && podman ps --format '{{.Names}}' 2>/dev/null | grep -q '^openmower$'; then
+  CONTAINER_IMAGE=$(podman inspect -f '{{.ImageName}}' openmower 2>/dev/null || true)
+  CONTAINER_DIGEST=$(podman inspect -f '{{.ImageDigest}}' openmower 2>/dev/null || true)
+fi
+
+ETHERBRIDGE=$(command -v etherbridge >/dev/null && echo yes || echo no)
+IMAGE_TAG="${CONTAINER_IMAGE##*:}"
+
+printf "OpenMowerOS %s mode:%s build:%s (%s)\n" "$OM_VARIANT" "${OM_MODE}" "${OPENMOWER_GIT_SHORT:-unknown}" "${OPENMOWER_BUILD_DATE:-n/a}" > "$ISSUE_TMP"
+cp "$ISSUE_TMP" /etc/issue
+
+mkdir -p /etc/motd.d
+cat > "$MOTD_FILE" <<EOF
+OpenMowerOS
+  Variant: $OM_VARIANT
+  OM_VERSION: $OM_VERSION
+  Mode: ${OM_MODE}
+  Build Commit: ${OPENMOWER_GIT_COMMIT:-unknown}
+  Build Date: ${OPENMOWER_BUILD_DATE:-n/a}
+  Container Image: ${CONTAINER_IMAGE:-n/a}
+  Digest: ${CONTAINER_DIGEST:-n/a}
+  EtherBridge: $ETHERBRIDGE
+Support quick info: openmower-refresh-branding (rerun) | journalctl -u openmower
+EOF
+
+exit 0

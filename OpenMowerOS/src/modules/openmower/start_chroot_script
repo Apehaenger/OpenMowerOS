@@ -44,6 +44,10 @@ systemctl disable podman-auto-update.timer
 echo_green "Eanbling OpenMower on boot"
 systemctl enable openmower
 
+echo_green "Enable branding refresh service"
+chmod +x /usr/local/bin/openmower-refresh-branding || true
+systemctl enable openmower-branding.service
+
 #cleanup
 apt-get clean
 apt-get autoremove --yes
